@@ -18,6 +18,11 @@
           description: >
             Kubernetes pod uid
 
+        - name: pod.ip
+          type: keyword
+          description: >
+            Kubernetes pod ip
+
         - name: namespace
           type: keyword
           description: >

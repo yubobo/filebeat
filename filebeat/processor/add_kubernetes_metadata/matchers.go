@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/processors/add_kubernetes_metadata"
+	"os"
 )
 
 func init() {
@@ -88,11 +89,16 @@ func (f *LogPathMatcher) MetadataIndex(event common.MapStr) string {
 
 		sourceLen := len(source)
 		logsPathLen := len(f.LogsPath)
-
 		if f.ResourceType == "pod" {
+			var kubeletPath string
+			if os.Getenv("KUBELET_PATH") != "" {
+				kubeletPath = os.Getenv("KUBELET_PATH")
+			} else {
+				kubeletPath = "/var/lib/kubelet/pods/"
+			}
 			// Specify a pod resource type when manually mounting log volumes and they end up under "/var/lib/kubelet/pods/"
 			// This will extract only the pod UID, which offers less granularity of metadata when compared to the container ID
-			if strings.HasPrefix(f.LogsPath, "/var/lib/kubelet/pods/") && strings.HasSuffix(source, ".log") {
+			if strings.HasPrefix(f.LogsPath, kubeletPath) {
 				pathDirs := strings.Split(source, "/")
 				if len(pathDirs) > podUIDPos {
 					podUID := strings.Split(source, "/")[podUIDPos]
@@ -100,7 +106,6 @@ func (f *LogPathMatcher) MetadataIndex(event common.MapStr) string {
 					logp.Debug("kubernetes", "Using pod uid: %s", podUID)
 					return podUID
 				}
-
 				logp.Debug("kubernetes", "Error extracting pod uid - source value contains matcher's logs_path, however it is too short to contain a Pod UID.")
 			}
 		} else {

@@ -78,8 +78,8 @@ func DiscoverKubernetesNode(host string, inCluster bool, client *k8s.Client) (no
 			logp.Err("kubernetes: Couldn't get namespace when beat is in cluster with error: ", err.Error())
 			return defaultNode
 		}
-		podName, err := os.Hostname()
-		if err != nil {
+		podName := os.Getenv("HOSTNAME")
+		if podName == "" {
 			logp.Err("kubernetes: Couldn't get hostname as beat pod name in cluster with error: ", err.Error())
 			return defaultNode
 		}

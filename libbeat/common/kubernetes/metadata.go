@@ -72,6 +72,7 @@ func (g *metaGenerator) PodMetadata(pod *Pod) common.MapStr {
 	meta := common.MapStr{
 		"pod": common.MapStr{
 			"name": pod.Metadata.GetName(),
+			"ip": pod.Status.GetPodIP(),
 		},
 		"node": common.MapStr{
 			"name": pod.Spec.GetNodeName(),
